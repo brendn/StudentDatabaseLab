@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -12,31 +13,28 @@ import java.util.Scanner;
  */
 public class StudentDatabaseLab {
 
-    //Each of the students in the class
-    private static final String[] STUDENTS = new String[] {
-            "Greg", "Bob", "Joe", "Steve", "Mike"
-    };
-
-    //Each of the students' hometowns
-    private static final String[] STUDENT_HOMETOWNS = new String[] {
-            "Detroit, MI", "Lansing, MI", "Flint, MI", "Royal Oak, MI", "Southfield, MI"
-    };
-
-    //Each of the students' favorite foods
-    private static final String[] STUDENT_FOODS = new String[] {
-            "Pork Rinds", "Pizza", "Ice cream", "Sushi", "Bread"
+    private static final Student[] STUDENTS = {
+            new Student("Greg", "Detroit, MI", "Pork Rinds"),
+            new Student("Bob", "Lansing, MI", "Pizza"),
+            new Student("Joe", "Flint, MI", "Ice cream"),
+            new Student("Steve", "Royal Oak, MI", "Sushi"),
+            new Student("Mike", "Southfield, MI", "Bread")
     };
 
     //Error messages
-    private static final String ERROR_NO_STUDENT = "That student does not exist.  Please try again. (enter a number 1-10):";
-    private static final String ERROR_NO_DATA = "That data does not exist.  Please try again. (enter or “hometown” or “favorite food”):";
+    private static final String ERROR_MESSAGE_NO_STUDENT = "That student does not exist.  Please try again. (enter a number 1-10):";
+    private static final String ERROR_MESSAGE_NO_DATA = "That data does not exist.  Please try again. (enter or “hometown” or “favorite food”):";
 
     //General messages
     private static final String MESSAGE_WELCOME = "Welcome to our Java class.  Which student would you like to learn more about? (enter a number 1-10):";
-    private static final String MESSAGE_STUDENT_INFO = "Student %s is %s.  What would you like to know about %s? (enter or “hometown” or “favorite food”):";
+    private static final String MESSAGE_STUDENT_INFO = "Student %s is %s.  What would you like to know about %s? (enter or “hometown” or “favorite food”):%n";
     private static final String MESSAGE_STUDENT_HOMETOWN = "%s is from %s.  Would you like to know more? (enter “yes” or “no“):";
     private static final String MESSAGE_STUDENT_FOOD = "%s's favorite food is %s.  Would you like to know more? (enter “yes” or “no“):";
     private static final String MESSAGE_EXIT = "Thanks!";
+
+    //Accepted inputs for asking for information
+    private static final String[] ACCEPTED_INPUTS_FOOD = { "favorite food", "food" };
+    private static final String[] ACCEPTED_INPUTS_HOMETOWN = { "town", "hometown", "home"};
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -56,7 +54,7 @@ public class StudentDatabaseLab {
             try {
                 do {
                     //Print student name and asks what the user would like to know
-                    System.out.printf(MESSAGE_STUDENT_INFO + "\n", studentID + 1, STUDENTS[studentID], STUDENTS[studentID]);
+                    System.out.printf(MESSAGE_STUDENT_INFO, studentID + 1, STUDENTS[studentID].getName(), STUDENTS[studentID].getName());
                     s = scanner.nextLine();
 
                     //Prints the requested info and asks if the user wants to continue
@@ -64,7 +62,7 @@ public class StudentDatabaseLab {
                     System.out.println(studentInfo);
 
                     //If we get an error message, prompt the user to enter new info
-                    while (studentInfo.equals(ERROR_NO_DATA)) {
+                    while (ERROR_MESSAGE_NO_DATA.equals(studentInfo)) {
                         s = scanner.nextLine();
                         studentInfo = getStudentInfo(studentID, s);
                         System.out.println(studentInfo);
@@ -77,7 +75,7 @@ public class StudentDatabaseLab {
                 runProgram = false;
                 System.out.println(MESSAGE_EXIT);
             } catch (IndexOutOfBoundsException e) {
-                System.out.println(ERROR_NO_STUDENT);
+                System.out.println(ERROR_MESSAGE_NO_STUDENT);
                 outOfBounds = true;
             }
         } while (runProgram);
@@ -94,15 +92,65 @@ public class StudentDatabaseLab {
      */
     private static String getStudentInfo(int id, String info) {
         try {
-            if (info.equalsIgnoreCase("favorite food") || info.equalsIgnoreCase("food")) {
-                return String.format(MESSAGE_STUDENT_FOOD, STUDENTS[id], STUDENT_FOODS[id]);
-            } else if (info.equalsIgnoreCase("hometown") || info.equalsIgnoreCase("town")) {
-                return String.format(MESSAGE_STUDENT_HOMETOWN, STUDENTS[id], STUDENT_HOMETOWNS[id]);
+            if (Arrays.stream(ACCEPTED_INPUTS_FOOD).anyMatch(s -> s.equalsIgnoreCase(info))) {
+                return String.format(MESSAGE_STUDENT_FOOD, STUDENTS[id].getName(), STUDENTS[id].getFavoriteFood());
+            } else if (Arrays.stream(ACCEPTED_INPUTS_HOMETOWN).anyMatch(s -> s.equalsIgnoreCase(info))) {
+                return String.format(MESSAGE_STUDENT_HOMETOWN, STUDENTS[id].getName(), STUDENTS[id].getHometown());
             } else {
-                return ERROR_NO_DATA;
+                return ERROR_MESSAGE_NO_DATA;
             }
         } catch (IndexOutOfBoundsException e) {
-            return ERROR_NO_STUDENT;
+            return ERROR_MESSAGE_NO_STUDENT;
+        }
+    }
+
+    /**
+     * Holds student information to keep things a bit more tidy.
+     *
+     * This class only contains three bits of info - their name, hometown, and favorite food.
+     */
+    static class Student {
+        //The name of the student
+        private final String NAME;
+
+        //The student's hometown
+        private final String HOMETOWN;
+
+        //The student's favorite food
+        private final String FAVORITE_FOOD;
+
+        /**
+         * Creates a student object with all the necessary information.
+         *
+         * @param name The name of the student
+         * @param hometown The student's hometown
+         * @param favoriteFood The student's favorite food
+         */
+        public Student(String name, String hometown, String favoriteFood) {
+            this.NAME = name;
+            this.HOMETOWN = hometown;
+            this.FAVORITE_FOOD = favoriteFood;
+        }
+
+        /**
+         * @return The name of the student
+         */
+        public String getName() {
+            return NAME;
+        }
+
+        /**
+         * @return The student's hometown
+         */
+        public String getHometown() {
+            return HOMETOWN;
+        }
+
+        /**
+         * @return The student's favorite food
+         */
+        public String getFavoriteFood() {
+            return FAVORITE_FOOD;
         }
     }
 }
